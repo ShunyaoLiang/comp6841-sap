@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <script>
+         function newTimer() {
+             let buffer = new SharedArrayBuffer(16);
+             let counter = new Worker('counter.js');
+             counter.postMessage([buffer]);
+             let arr = new Uint32Array(buffer);
+
+             let ret = [() => arr[0], counter];
+             return new Promise(resolve => {
+                 counter.addEventListener('message', _ => resolve(ret));
+             });
+         }
+
+         function dropTimer(timer) {
+             timer.terminate();
+         }
+
+         function sleep(ms) {
+             return new Promise(resolve => setTimeout(resolve, ms));
+         }
+
+         async function calibrate(ms, now) {
+             let before = now();
+             await sleep(ms);
+             return (now() - before) / ms;
+         }
+
+         function average(xs) {
+             return xs.reduce((a, b) => a + b) / xs.length;
+         }
+
+         async function checkLet() {
+             let [now, timer] = await newTimer();
+             let ticks = [];
+             for (let i = 4; i < 50; i++) {
+                 let before = now();
+                 await sleep(i);
+                 let after = now();
+                 let diff = after - before;
+                 ticks.push(diff / i);
+             }
+
+             dropTimer(timer);
+             console.log(ticks);
+
+             return average(ticks);
+         }
+
+         async function checkVar() {
+             var [now, timer] = await newTimer();
+             var ticks = [];
+             for (var i = 4; i < 50; i++) {
+                 var before = now();
+                 await sleep(i);
+                 var after = now();
+                 var diff = after - before;
+                 ticks.push(diff / i);
+             }
+
+             dropTimer(timer);
+             console.log(ticks);
+
+             return average(ticks);
+         }
+
+         async function profileCacheSet() {
+
+
+             var size = 6 * 1024 * 1024;
+
+             // Buffer of size 8MB
+             var buffer = new ArrayBuffer(size);
+             var view = new DataView(buffer);
+
+             var offset = 64;
+
+             var startAddress = 0;
+
+             var error_count = 0;
+
+             var current;
+
+             var flushed = [];
+             var unflushed = [];
+             var flushed_sum = 0;
+             var unflushed_sum = 0;
+
+             var max_time = 0;
+
+             // initialize linked list
+             for (var i = 0; i < ((size) / offset) - 1; i++) {
+                 view.setUint32(i * offset, (i+1) * offset);
+             }
+             view.setUint32((((size) / offset) - 1 ) * offset, 0);
+
+             // numbber of rounds to test the attack
+             var rounds = 100;
+
+             // 10 ^ 6
+             // JavaScript HighResolution Time API provides sub milliseconds time measurements (10^-3 s)
+             // Multiplying by 10^-6 provides time measurements in nano seconds, easier to read and display.
+
+             var times = 1;
+
+             // Variable
+             var x = 0;
+
+             let [now, timer] = await newTimer();
+
+             for(var round = 0; round < rounds; round++) {
+                 // access all elements in view to add them to the cache, start from random value and
+                 // access it as a linked list.
+                 startAddress = Math.floor((Math.random() * (size/offset))) * offset;
+                 current = startAddress;
+                 do {
+                     current = view.getUint32(current);
+                 } while (current != startAddress);
+
+                 var startTimeRAM = now();
+                 current = x;
+                 var endTimeRAM = now();
+
+                 // access the previous variable again, this time from the cache
+                 var startTimeCache = now();
+                 current = x;
+                 var endTimeCache = now();
+
+                 var diffTimeRAM = Math.floor((endTimeRAM - startTimeRAM) * times);
+                 flushed.push(diffTimeRAM);
+                 flushed_sum  += diffTimeRAM;
+
+                 var diffTimeCache = Math.floor((endTimeCache - startTimeCache) * times);
+                 unflushed.push(diffTimeCache);
+                 unflushed_sum += diffTimeCache;
+
+                 if(max_time < diffTimeRAM) {
+                     max_time = diffTimeRAM
+                 }
+                 if(max_time < diffTimeCache) {
+                     max_time = diffTimeCache;
+                 }
+
+                 if(diffTimeRAM < diffTimeCache) {
+                     error_count++;
+                 }
+             }
+
+             console.log("Flushed avg: " + (flushed_sum/rounds));
+             console.log("Unflushed avg: " + (unflushed_sum/rounds));
+             console.log("Error count: " +  error_count);
+
+             dropTimer(timer);
+         }
+        </script>
+    </body>
+</html>

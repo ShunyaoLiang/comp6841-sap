@@ -1,0 +1,15 @@
+{
+    "extends": "@tsconfig/strictest/tsconfig.json",
+    "compilerOptions": {
+        "lib": [
+            "ES2015",
+            "DOM"
+        ]
+    },
+    "include": [
+        "node_modules/tc-spy-wasm/tc_spy_wasm.d.ts"
+    ],
+    "files": [
+        "script.ts"
+    ]
+}

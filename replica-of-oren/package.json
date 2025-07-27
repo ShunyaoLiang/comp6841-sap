@@ -1,0 +1,11 @@
+{
+  "name": "replica-of-oren",
+  "version": "1.0.0",
+	"scripts": {
+		  "build": "tsc --project ."
+	},
+  "devDependencies": {
+    "@tsconfig/strictest": "^2.0.5",
+    "typescript": "^5.8.3"
+  }
+}

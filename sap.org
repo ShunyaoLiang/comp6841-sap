@@ -1,0 +1,84 @@
+ * I think the VM was made on June 29 (Week 4), so that's probably when I was
+   working on it
+* Entry
+SCHEDULED: <2025-07-16 Wed>
+ * Tried to run the calibration script on the Mac
+ * Took some time to get a working HTML form surrounding it
+ * Lots of difficulty installing the right Firefox version:
+   * Tried to use Ubuntuzilla--bust.
+     I couldn't figure out how to get older Firefox versions.
+   * Installed from FTP archive manually
+   * 34 can't run WebAssembly--of course!
+   * 52 can't load JavaScript modules, so the way my code is written doesn't work
+   * 54 has a config option that can load modules, but still doesn't know that
+     =await= is a keyword!
+     As in, it reports that =await= is a reserved identifier, when I am using it
+     normally.
+ * But I did check that =Performance.now()= didn't have the reduced precision on
+   these versions
+* Entry
+SCHEDULED: <2025-07-19 Sat>
+ * So the issue is that the code I'm generating relies on WASM "reference types".
+   Those aren't available in Firefox until Firefox 79.
+ * The last version of Firefox before the anti-fingerprinting patches is Firefox
+   59
+ * It seems like this isn't intended by Rust though:
+   https://github.com/rust-lang/rust/issues/128475
+   It is a regression, caused by LLVM enabling features by default.
+
+ * Okay I found a fix from that above Issue.
+ * Now, when loading the module, we get "Loading failed for the module with source"
+
+ * Useful to run [firefox] with the [-g] flag, which runs it in a debugger
+
+ * Also, it's annoying that Firefox will overwrite itself with the installed version
+
+ * Claude suggests the following three possible causes:
+   * Use of BigInt
+   * Use of ES6 module imports
+   * wasm-bindgen incompatibility
+
+ * I couldn't find any uses of BigInt in the JS driver code
+
+ * I'm going to try to not use module imports now
+
+ * It worked!! Need to build with =--target no-modules=
+   Okay, wasm validation error. Unrecognized opcode c3 0
+
+ * The [c3] opcode is for extending a 16-bit integer to a 64-bit one.
+   This is part of the "Sign-extension operators" extension.
+   I need to disable it.
+
+ * The code finally runs
+
+* Entry
+SCHEDULED: <2025-07-20 Sun>
+ * Today I have been trying to collect data on what the impact of the cache miss is
+ * Eventually I wrote code that
+   * Tries to find at least one address that is in the same cache set as the victim address
+   * Then measures the effect of causing a cache miss by accessing that one
+     address --- "squatter" address?
+   * Then measures the effect of no cache miss. If I access the whole cache set,
+     the victim, then the whole cache set, then the victim, what is the time
+     diff between the two victim accesses?
+ * I have data: [[2025-07-20-comparison-with-without...json]]
+ * But the data makes no sense.
+   The data WITHOUT a cache miss has a higher range than WITH the cache miss.
+   In general, there is LESS OF A DIFF with the cache miss thant WITHOUT the cache miss
+   IDK WHAT TO DOOOOO
+
+ * OMFG THERE WAS A BUG IN MY BENCHMARKING CODE
+ * I WASN'T ACTUALLY CHECKING THE TIME OF A CACHE MISS
+ * AFTER I FIXED IT I FINALLY GOT GOOD RESULTS, SEE THE TIMINGS FILE
+
+ * now im just tuning the parameters of profile cache set to make it actually
+   have results
+
+ * nope, my code was busted. it was auto exiting when we got to an arrya of 16.
+   every time it runs, it generates a new eviction set :/
+
+
+* HUGE
+SCHEDULED: <2025-07-25 Fri>
+ * LINKED LISTS MAKE IT FASTERRR
+ * Chris told me to try a newer ver of ubuntu and it actually worked with UTM. should lead to perf gains

@@ -1,0 +1,31 @@
+[package]
+name = "tc-spy-wasm"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+console_error_panic_hook = "0.1.7"
+js-sys = "0.3.77"
+wasm-bindgen = "0.2.100"
+wasm-bindgen-test = "0.3.50"
+
+[dependencies.web-sys]
+version = "0.3.77"
+features = ["Performance", "Window", "console"]
+
+[dependencies.bytemuck]
+version = "1.23.1"
+features = ["must_cast"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
+# Ensures that we do not use the sign-extensions operators WASM extension.
+# https://github.com/rust-lang/rust/issues/109807#issuecomment-1704431724
+[package.metadata.wasm-pack.profile.dev]
+wasm-opt = ["--signext-lowering"]
+[package.metadata.wasm-pack.profile.profiling]
+wasm-opt = ["--signext-lowering"]
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["--signext-lowering"]

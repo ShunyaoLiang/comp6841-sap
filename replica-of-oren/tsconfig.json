@@ -1,0 +1,9 @@
+{
+    "extends": "@tsconfig/strictest/tsconfig.json",
+    "compilerOptions": {
+        "lib": ["dom", "ES2015"]
+    },
+    "files": [
+        "script.ts"
+    ]
+}

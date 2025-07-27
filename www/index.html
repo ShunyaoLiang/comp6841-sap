@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <title>Time Channel Demo</title>
+  </head>
+  <body>
+      <form id="calibrate-form">
+          <fieldset>
+              <legend>Cache profiling calibration</legend>
+              <p>
+                  <!-- TODO: Choose a better naming convention for tag ids. -->
+                  <label for="calibrate-form-victim-address">
+                      <input id="calibrate-form-victim-address" type="number">
+                      Victim address
+                  </label>
+              </p>
+              <p>
+                  <button>Run calibration</button>
+                  <a id="download-timings-anchor" hidden>Download timing data</a>
+              </p>
+          </fieldset>
+      </form>
+      <!-- D3 is a data visualisation library. -->
+      <script src="node_modules/d3/dist/d3.min.js"></script>
+      <script src="node_modules/tc-spy-wasm/tc_spy_wasm.js"></script>
+      <script src="script.js"></script>
+      <script>
+      </script>
+  </body>
+</html>
