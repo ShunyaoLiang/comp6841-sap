@@ -10,6 +10,7 @@
 \usepackage{minted}
 
 \usepackage{enumitem}
+\usepackage{graphicx}
 
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning, fit, patterns, shapes.geometric,
@@ -354,52 +355,15 @@ That would stop my implementation of the attack in its tracks.
 
 \section{Correspondence with Dr Oren}
 
-\begin{blockquote}
- Hi Dr Oren,
-
- I'm an undergraduate computer science student from UNSW in Australia. I
- was really intrigued by your 2015 paper "The Spy in the Sandbox:
- Practical Cache Attacks in JavaScript and their Implications". I'm
- currently doing a project for a cybersecurity unit where I am trying to
- replicate the timing channel vulnerability described in that paper. I
- was wondering if you might be willing to share with me the source code
- for the proof-of-concept demo.
-
- I've been trying for the last few weeks to implement the algorithms
- outlined in the paper. For Algorithm 1, which profiles the cache set,
- I've been struggling to choose a suitable threshold for detecting that
- the access time has sped up. Either my implementation is too sensitive,
- and reduces the cache set to zero, or it never terminates (within a
- reasonable time). I've been running my experiments on an old 2016
- MacBook Pro, which has a 6th Gen Intel Core CPU.
-
- If you aren't able to share the code, I'd appreciate any advice you
- might have for choosing a suitable threshold value or other
- implementation details.
-
- Thank you in advance.
-
- Best, Thomas
-\end{blockquote}
-\bigbreak
-\begin{blockquote}
-
-Thanks for getting in touch Thomas.
-
-The code for "The Spy in the Sandbox” was written back when JavaScript timers had nanosecond-level resolution. As a result of this work and several others, browser timers were severely degraded, and you can’t tell apart a cache hit from a miss that easily. You can read more about the degradation of timers, and how attackers got around them, in this excellent paper:
-
-\url{https://doi.org/10.1007/978-3-319-70972-7_13}
-Fantastic Timers and Where to Find Them: High-Resolution Microarchitectural Attacks in JavaScript
-doi.org
-
-If you want to perform basic experiments with eviction set creation, the minimum effort path would probably be to forgo the browser and write something in native code (e.g. C), where the timer resolution is still very high. Another option would be to download an old version of Firefox or Chromium, from before the date where countermeasures were put in place:
-\url{https://ftp.mozilla.org/pub/firefox/releases/}
-\url{https://sourceforge.net/projects/osxportableapps/files/Chromium/}
-
-Good luck and happy hacking, Yossi.
-\end{blockquote}
+\begin{center}
+  \includegraphics[width=0.5\textwidth]{email-to-oren.png}
+  \includegraphics[width=0.5\textwidth]{reply-from-oren.png}
+\end{center}
 
 \section{Link to artifact}
+
+You can find all the artifacts for this project at the following GitHub
+repository: \url{https://github.com/ShunyaoLiang/comp6841-sap}.
 
 \printbibliography
 
