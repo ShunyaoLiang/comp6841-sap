@@ -161,9 +161,14 @@ By monitoring accesses to certain cache sets, the authors could determine a
 unique memory-access ``fingerprint'' for different popular websites, and that
 are triggered by hardware events.
 
+I refer the interested reader to the paper itself, for the details of the
+algorithm.
+
 According to Dr Oren in private correspondence, as a result of this paper and
 other work, browser vendors quickly lowered the resolution of time that
 JavaScript code had access to.
+
+
 
 \section{Implementing the Attack}
 
@@ -185,12 +190,20 @@ She cites \textcite{Oren_KSK_2015}, and provides some code to measure the timing
 variations.
 I adapted that code into my own style, rewriting it in TypeScript.
 
+Because of how abstract the JS runtime is, the algorithms outlined in
+the paper are \emph{heuristics}, and so do not always succeed.
+One reason is because the JavaScript runtime will also
+touch the cache in unpredictable ways, interfering with our measurements.
+It is important that we minimise every unnecessary function call or memory
+access, since that might hurt the accuracy of our algorithm.
+
 Next, I sought out to implement Algorithm 1.
 The primary difficulty for this part was all the optimisations required.
-I made a major error in that I skipped over Optimisation #1 listed in the paper,
+I made a major error in that I skipped over Optimisation \#1 listed in the paper,
 which reduces the search space for the algorithm from over 131K offsets to just 8K.
 Embarrassingly, I only discovered this in the final week of the project.
 Other optimisations I learnt about are as follows:
+
 
 \paragraph{Just-In-Time compilation.}
 Because the JS engine in Firefox (and in most browsers) is a
@@ -241,11 +254,17 @@ its own linked list.
 Each value in the array ``pointed'' to the next element, and so we iterated
 through the buffer as if we were traversing a linked list.
 
+\paragraph{Linked lists}
+As mentioned above, in order to minimise the amount of touched memory during the
+cache profiling process, I implemented my own linked list.
+Na\"ively, we might implement the cache set using a JS Array, which is backed by
+a contiguous memory buffer.
+However, to insert elements to the front, that would cause all the elements to
+have to be shifted, touching a lot of memory addresses.
+Instead, I used a linked list, so that when we are removing an offset from the
+cache set, we only had to touch one field of the list.
+
 \paragraph{\WASM{} optimisation.}
-Because of how abstract the JS runtime is, the algorithms outlined in
-the paper are \emph{heuristics}, and so do not always succeed.
-One reason is because the JavaScript runtime will also
-touch the cache in unpredictable ways, interfering with our measurements.
 I had a hunch that we might be able to lower this by running the measurements in
 WebAssembly (\WASM{})\footnote{\url{https://webassembly.org/}}, a relatively-new
 format for web programming language that is similar to native machine code.
@@ -343,9 +362,19 @@ That would stop my implementation of the attack in its tracks.
   I had various graphics incompatibilities with UTM and Ubuntu 14.04, so I had
   to use VirtualBox.
 \item[Week 5]
-  Implementing Rust version.
+  Implementing the Rust version.
+  I followed a Rust and WebAssembly tutorial, and read a lot about WebAssembly
+  internals.
+  I lost a lot of time because the newest version of the Rust compiler and LLVM
+  use \WASM{} extensions that are not supported by Firefox 52.
+  I learnt about \WASM{} validation techniques, and about the various
+  extensions.
+  See \code{tc-spy-wasm/Makefile} for how we eliminate use of the Reference
+  Types and Sign-Extension Operators \WASM{} extensions.
 \item[Week 6]
   Reimplementing the JS version, using just what the paper describes.
+  Side quests included implementing my own linked list in JS to make removing
+  from the cache set as fast as possible.
 \item [Week 7]
   Hopelessly trying to optimise the above implementation.
   Rewriting to have the various optimisations described above.
@@ -353,6 +382,7 @@ That would stop my implementation of the attack in its tracks.
   Writing this report.
 \end{description}
 
+\newpage
 \section{Correspondence with Dr Oren}
 
 \begin{center}
